@@ -71,8 +71,16 @@ function renderStatusStrip(serverStatus, mapRotation, predator) {
         マップ情報: 取得エラー
       </div>`;
   } else if (mapRotation?.battle_royale?.current?.map) {
-    strip.innerHTML += `
-      <div class="status-chip">現在のマップ (BR): ${escapeHtml(mapRotation.battle_royale.current.map)}</div>`;
+    const br = mapRotation.battle_royale;
+    const brText = br.next?.map
+      ? `${escapeHtml(br.current.map)}（次: ${escapeHtml(br.next.map)}）`
+      : escapeHtml(br.current.map);
+    strip.innerHTML += `<div class="status-chip">BR: ${brText}</div>`;
+
+    const ranked = mapRotation.ranked?.current?.map;
+    if (ranked) {
+      strip.innerHTML += `<div class="status-chip">ランク: ${escapeHtml(ranked)}</div>`;
+    }
   }
 
   // Predator/Masters threshold — response shape is an unverified guess
