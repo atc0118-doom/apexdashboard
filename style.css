@@ -1,257 +1,152 @@
-:root {
-  --bg: #0b0d0f;
-  --panel: #14171a;
-  --panel-raised: #1b1f23;
-  --line: #23282d;
-  --text: #e8e6e1;
-  --muted: #7a8288;
-  --amber: #ff9f1c;
-  --amber-dim: #6b4a15;
-  --red: #e6533f;
-  --green: #4fd1a5;
-  --mono: 'IBM Plex Mono', monospace;
-  --display: 'Oswald', sans-serif;
-  --body: 'Inter', sans-serif;
+:root{
+  --bg:#0a0a0c;
+  --card:#131316;
+  --border:#232328;
+  --text:#f2f2f4;
+  --muted:#8b8b93;
+  --green:#3ecf8e;
+  --yellow:#c9ab45;
+  --red:#e0574f;
 }
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  background: var(--bg);
-  background-image:
-    linear-gradient(180deg, rgba(255,159,28,0.04) 0%, transparent 220px);
-  color: var(--text);
-  font-family: var(--body);
-  min-height: 100dvh;
-  overscroll-behavior-y: contain;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Hiragino Sans','Noto Sans JP',sans-serif;
+  -webkit-font-smoothing:antialiased;
 }
+main{max-width:640px;margin:0 auto;padding:20px 16px 60px}
 
-/* ---------- HUD bar ---------- */
-.hud-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 28px;
-  border-bottom: 1px solid var(--line);
-  background: var(--panel);
-}
+/* FIX: on desktop this used to just keep stacking cards in a single narrow
+   640px-max column centered on the page, with huge empty margins on either
+   side — every section (news, warnings, earthquakes) stacked vertically
+   made the page extremely tall for no real reason on a wide screen. Above
+   900px, switch to a 2-column layout: news (usually the longest list) gets
+   a wider left column, warnings + earthquakes stack in a narrower right
+   column. On mobile, .col-main/.col-side use display:contents so their
+   .card children behave exactly as before — direct stacked children of
+   .dashboard-grid in the same document order, no visual change at all. */
+.dashboard-grid{display:block}
+.col-main,.col-side{display:contents}
+.col-side-note{display:none}
 
-.hud-brand { display: flex; align-items: center; gap: 14px; }
-
-.hud-mark {
-  font-size: 22px;
-  color: var(--amber);
-  transform: rotate(90deg);
-  display: inline-block;
-}
-
-.hud-title h1 {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 22px;
-  letter-spacing: 2px;
-  margin: 0;
-}
-
-.hud-subtitle {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: var(--muted);
-  font-family: var(--mono);
-  letter-spacing: 0.5px;
-}
-
-.hud-meta { display: flex; align-items: center; gap: 16px; }
-
-.hud-clock {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.hud-refresh {
-  background: transparent;
-  border: 1px solid var(--amber-dim);
-  color: var(--amber);
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 1px;
-  padding: 8px 14px;
-  cursor: pointer;
-  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-  transition: background 0.15s, color 0.15s;
-}
-.hud-refresh:hover { background: var(--amber); color: #0b0d0f; }
-
-/* ---------- status strip ---------- */
-.status-strip {
-  display: flex;
-  gap: 12px;
-  padding: 0 28px;
-  margin-top: 16px;
-  flex-wrap: wrap;
-}
-
-.status-chip {
-  font-family: var(--mono);
-  font-size: 12px;
-  padding: 8px 14px;
-  border-radius: 2px;
-  border: 1px solid var(--line);
-  background: var(--panel);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.status-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--green);
-}
-.status-dot.is-down { background: var(--red); }
-.status-dot.is-unknown { background: var(--muted); }
-
-.status-chip code {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
-}
-
-/* ---------- category ring nav ---------- */
-.ring-nav {
-  display: flex;
-  gap: 8px;
-  padding: 16px 28px 0;
-  flex-wrap: wrap;
-}
-
-.ring-tab {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.5px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  color: var(--muted);
-  padding: 8px 16px;
-  cursor: pointer;
-  border-radius: 999px;
-  transition: border-color 0.15s, color 0.15s;
-}
-.ring-tab:hover { color: var(--text); }
-.ring-tab.is-active {
-  border-color: var(--amber);
-  color: var(--amber);
-}
-
-/* ---------- feed ---------- */
-.feed {
-  padding: 20px 28px 60px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-.feed-section-title {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  font-family: var(--display);
-  font-weight: 600;
-  font-size: 15px;
-  letter-spacing: 1px;
-  color: var(--text);
-  margin: 0 0 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line);
-}
-
-.feed-section-count {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 12px;
-  align-items: start;
-}
-
-.feed-loading, .feed-empty {
-  color: var(--muted);
-  font-family: var(--mono);
-  font-size: 13px;
-}
-
-.feed-card {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--amber-dim);
-  padding: 14px 16px;
-  border-radius: 2px;
-  contain: content;
-}
-@media (hover: hover) {
-  .feed-card {
-    transition: border-left-color 0.15s, background 0.15s;
+@media(min-width:900px){
+  main{max-width:1180px}
+  /* FIX: switched from CSS Grid to Flexbox for this layout. position:sticky
+     inside a CSS Grid item has historically had more inconsistent
+     cross-browser behavior than the same pattern inside Flexbox — reported
+     symptom was the sidebar staying still for a while, then unexpectedly
+     starting to scroll partway down the page instead of just detaching
+     once at the very bottom. Flexbox + sticky is the more standard,
+     widely-tested combination for this exact "sticky sidebar" pattern. */
+  .dashboard-grid{display:flex;align-items:flex-start;gap:20px}
+  .col-main{flex:1.6}
+  .col-side{flex:1}
+  .col-main,.col-side{display:flex;flex-direction:column;gap:20px}
+  .card{margin-top:0}
+  /* FIX: right column ended early on desktop, leaving a large visual gap
+     below it. A compact repeat of the footer disclaimer at the end of the
+     column gives it a deliberate stopping point instead of just trailing
+     off into empty space. Hidden on mobile (see .col-side-note{display:none}
+     above) since the full-width footer already covers this there and a
+     second copy would just be redundant on a narrow screen. */
+  .col-side-note{
+    display:block;color:var(--muted);font-size:11px;line-height:1.6;
+    padding:4px 2px 0;
   }
-  .feed-card:hover { background: var(--panel-raised); }
-}
-.feed-card.cat-patch { border-left-color: var(--amber); }
-.feed-card.cat-esports { border-left-color: #6fb1ff; }
-.feed-card.cat-outage { border-left-color: var(--red); }
-.feed-card.cat-general { border-left-color: var(--line); }
-
-.feed-card-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 6px;
-}
-
-.feed-card-tag {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.5px;
-  color: var(--muted);
-  text-transform: uppercase;
+  /* FIX: News is naturally much longer than warnings+earthquakes combined,
+     so the right column was finishing early and leaving a large blank gap
+     below it while the page kept scrolling through news — visually
+     lopsided. Sticky-positioning the right column keeps it in view instead
+     of leaving dead space; it stays pinned near the top of the viewport
+     until its own content (or the end of the news column) scrolls past it,
+     which is the standard "sidebar" pattern most desktop news sites use.
+     FIX: this originally also had max-height:calc(100vh - 40px) plus
+     overflow-y:auto, so a long warnings list (16+ prefectures) combined
+     with the earthquake card could exceed that height and turn .col-side
+     into its OWN internal scroll region. Under touch, a sticky element that
+     also scrolls internally reads as "still moving" even though it's
+     technically pinned — dragging over that area scrolls its own content
+     rather than feeling anchored. Dropping the internal scroll constraint
+     means .col-side is just a plain sticky block: it pins near the top and
+     rides along with whatever height its content naturally needs, with no
+     separate scroll interaction to fight against on touch. */
+  .col-side{position:sticky;top:20px}
 }
 
-.feed-card-title a {
-  color: var(--text);
-  text-decoration: none;
-  font-size: 14px;
-  line-height: 1.5;
+.hero{padding:24px 4px 8px}
+.hero h1{
+  font-family:'SF Mono','JetBrains Mono','Fira Code',ui-monospace,Menlo,Consolas,monospace;
+  font-size:38px;font-weight:700;letter-spacing:-.01em;margin:0;
 }
-.feed-card-title a:hover { color: var(--amber); }
+.subtitle{color:#8fb89f;margin:4px 0 16px;font-size:14px;letter-spacing:.01em}
+.status-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.status-badge{
+  display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;
+  font-size:11px;font-weight:700;letter-spacing:.08em;border:1px solid var(--border);
+}
+.status-live{color:var(--green);border-color:rgba(62,207,142,.4)}
+.status-degraded{color:var(--yellow);border-color:rgba(201,171,69,.4)}
+.updated{color:var(--muted);font-size:12px}
 
-.feed-card-meta {
-  margin-top: 8px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:18px 16px;
+  margin-top:16px;
+}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.card-head b{font-size:15px;letter-spacing:.06em}
+.card-head span{color:var(--muted);font-size:12px}
+.section-note{color:var(--muted);font-size:12px;line-height:1.6;margin:0 0 12px}
+
+.empty{color:var(--muted);font-size:13px;padding:8px 0}
+.empty.error{color:var(--red);background:rgba(224,87,79,.08);border:1px solid rgba(224,87,79,.25);border-radius:10px;padding:10px 12px}
+
+.news-list{display:flex;flex-direction:column;gap:2px}
+.news-item{
+  display:flex;flex-direction:column;gap:3px;
+  padding:10px 4px;border-bottom:1px solid var(--border);
+  text-decoration:none;color:inherit;
+}
+.news-item:last-child{border-bottom:none}
+.news-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.news-source{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.news-title{font-size:14px;line-height:1.5}
+.news-time{color:var(--muted);font-size:11px;white-space:nowrap;flex-shrink:0}
+
+.warning-list{display:flex;flex-direction:column;gap:8px}
+.warning-item{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;
+  padding:10px 12px;background:rgba(224,87,79,.08);border:1px solid rgba(224,87,79,.25);border-radius:10px;
+  text-decoration:none;color:inherit;
+}
+.warning-pref{font-weight:700;font-size:13px}
+.warning-tags em{
+  font-style:normal;font-size:11px;color:var(--yellow);margin-left:6px;
 }
 
-/* ---------- footer ---------- */
-.hud-footer {
-  border-top: 1px solid var(--line);
-  padding: 18px 28px 32px;
-  color: var(--muted);
-  font-size: 11px;
-  font-family: var(--mono);
+.quake-list{display:flex;flex-direction:column;gap:2px}
+.quake-item{
+  display:flex;flex-direction:column;gap:2px;padding:10px 4px;border-bottom:1px solid var(--border);
+  text-decoration:none;color:inherit;
+}
+.quake-item:last-child{border-bottom:none}
+.quake-title{font-size:14px;font-weight:600}
+.routine-tag{
+  font-style:normal;font-size:10px;font-weight:700;color:var(--muted);
+  background:rgba(139,139,147,.15);border-radius:4px;padding:1px 5px;
+  vertical-align:middle;
+}
+.quake-summary{font-size:12px;color:var(--muted);line-height:1.5}
+.quake-time{font-size:11px;color:var(--muted)}
+
+.footer{
+  margin:30px 4px 0;color:var(--muted);font-size:11px;line-height:1.6;
 }
 
-/* ---------- keyboard focus ---------- */
-.hud-refresh:focus-visible,
-.ring-tab:focus-visible,
-.feed-card-title a:focus-visible {
-  outline: 2px solid var(--amber);
-  outline-offset: 2px;
-}
-
-@media (max-width: 640px) {
-  .hud-bar { flex-wrap: wrap; gap: 12px; padding: 16px; }
-  .status-strip, .ring-nav, .feed, .hud-footer { padding-left: 16px; padding-right: 16px; }
+@media(max-width:400px){
+  .hero h1{font-size:32px}
 }
