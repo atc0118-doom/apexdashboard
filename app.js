@@ -111,16 +111,38 @@ function setActiveCategory(key) {
 
 function renderFeed() {
   const feedEl = document.getElementById('feed');
-  const items = state.activeCategory === 'all'
-    ? state.items
-    : state.items.filter(i => i.category === state.activeCategory);
 
-  if (!items.length) {
+  if (state.activeCategory !== 'all') {
+    const items = state.items.filter(i => i.category === state.activeCategory);
+    feedEl.innerHTML = renderCardGrid(items);
+    return;
+  }
+
+  // "ALL" view: group by category so the grid isn't one giant undifferentiated wall.
+  const order = ['patch', 'esports', 'outage', 'general'];
+  const groups = order
+    .map(key => ({ key, items: state.items.filter(i => i.category === key) }))
+    .filter(g => g.items.length);
+
+  if (!groups.length) {
     feedEl.innerHTML = '<p class="feed-empty">該当する記事がありません。</p>';
     return;
   }
 
-  feedEl.innerHTML = items.map(item => `
+  feedEl.innerHTML = groups.map(g => `
+    <section class="feed-section">
+      <h2 class="feed-section-title">
+        ${escapeHtml(CATEGORY_LABELS[g.key] || g.key)}
+        <span class="feed-section-count">${g.items.length}</span>
+      </h2>
+      ${renderCardGrid(g.items)}
+    </section>
+  `).join('');
+}
+
+function renderCardGrid(items) {
+  if (!items.length) return '<p class="feed-empty">該当する記事がありません。</p>';
+  return `<div class="card-grid">${items.map(item => `
     <article class="feed-card cat-${item.category}">
       <div class="feed-card-top">
         <span class="feed-card-tag">${escapeHtml(CATEGORY_LABELS[item.category] || item.category)}</span>
@@ -131,7 +153,7 @@ function renderFeed() {
       </div>
       <div class="feed-card-meta">${item.published ? new Date(item.published).toLocaleString('ja-JP', { hour12: false }) : ''}</div>
     </article>
-  `).join('');
+  `).join('')}</div>`;
 }
 
 function escapeHtml(str = '') {
