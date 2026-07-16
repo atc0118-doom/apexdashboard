@@ -32,8 +32,8 @@ const REDDIT_COMPETITIVEAPEX_RSS = 'https://www.reddit.com/r/CompetitiveApex/.rs
 const REDDIT_USER_AGENT = process.env.REDDIT_USER_AGENT || 'web:apex-watch-dashboard:v1.2 (personal non-commercial project)';
 
 const APEX_STATUS_API_KEY = process.env.APEX_STATUS_API_KEY || '';
-const APEX_STATUS_SERVERS_URL = 'https://api.mozambiquehe.re/servers';
-const APEX_STATUS_MAPROTATION_URL = 'https://api.mozambiquehe.re/maprotation?version=2';
+const APEX_STATUS_SERVERS_URL = 'https://api.apexlegendsstatus.com/servers';
+const APEX_STATUS_MAPROTATION_URL = 'https://api.apexlegendsstatus.com/maprotation?version=2';
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
 let cache = { data: null, ts: 0 };
