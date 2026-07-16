@@ -20,7 +20,7 @@ const GOOGLE_NEWS_ALGS_URL =
   'https://news.google.com/rss/search?q=ALGS%20%22Apex%20Legends%22%20esports&hl=en-US&gl=US&ceid=US:en';
 const GOOGLE_NEWS_JP_URL =
   'https://news.google.com/rss/search?q=%22エーペックスレジェンズ%22&hl=ja&gl=JP&ceid=JP:ja';
-const REDDIT_APEXLEGENDS_RSS = 'https://www.reddit.com/r/apexlegends/.rss';
+const REDDIT_APEXLEGENDS_RSS = 'https://www.reddit.com/r/apexlegends/top/.rss?t=day'; // top-of-day, not raw newest — cuts down on low-signal chatter
 const REDDIT_COMPETITIVEAPEX_RSS = 'https://www.reddit.com/r/CompetitiveApex/.rss';
 
 // Reddit asks for a descriptive User-Agent (platform:app-id:version (by /u/username)).
