@@ -23,7 +23,8 @@ body {
     linear-gradient(180deg, rgba(255,159,28,0.04) 0%, transparent 220px);
   color: var(--text);
   font-family: var(--body);
-  min-height: 100vh;
+  min-height: 100dvh;
+  overscroll-behavior-y: contain;
 }
 
 /* ---------- HUD bar ---------- */
@@ -184,9 +185,14 @@ body {
   border-left: 3px solid var(--amber-dim);
   padding: 14px 16px;
   border-radius: 2px;
-  transition: border-left-color 0.15s, background 0.15s;
+  contain: content;
 }
-.feed-card:hover { background: var(--panel-raised); }
+@media (hover: hover) {
+  .feed-card {
+    transition: border-left-color 0.15s, background 0.15s;
+  }
+  .feed-card:hover { background: var(--panel-raised); }
+}
 .feed-card.cat-patch { border-left-color: var(--amber); }
 .feed-card.cat-esports { border-left-color: #6fb1ff; }
 .feed-card.cat-outage { border-left-color: var(--red); }
