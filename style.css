@@ -112,6 +112,12 @@ body {
 .status-dot.is-down { background: var(--red); }
 .status-dot.is-unknown { background: var(--muted); }
 
+.status-chip code {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
 /* ---------- category ring nav ---------- */
 .ring-nav {
   display: flex;

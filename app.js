@@ -19,11 +19,47 @@ async function loadDashboard() {
 
     state.items = data.items || [];
     renderGeneratedAt(data.generatedAt);
-    renderStatusStrip(data.serverStatus, data.mapRotation);
+    renderStatusStrip(data.serverStatus, data.mapRotation, data.predator);
+    renderLeaderboard(data.leaderboard);
     renderCategoryNav(data.categoryCounts);
     renderFeed();
   } catch (e) {
     feedEl.innerHTML = `<p class="feed-empty">取得に失敗しました: ${escapeHtml(e.message)}</p>`;
+  }
+}
+
+// Leaderboard response shape is unverified — the API docs only show the
+// query params (legend/key/platform), not what comes back. Render whatever
+// looks like a ranked player array; otherwise show the raw JSON so it's at
+// least visible instead of silently doing nothing.
+function renderLeaderboard(leaderboard) {
+  const el = document.getElementById('leaderboard-strip');
+  el.innerHTML = '';
+
+  if (!leaderboard) return; // no API key configured — say nothing extra, status-strip already covers this
+
+  if (leaderboard.error) {
+    el.innerHTML = `
+      <div class="status-chip">
+        <span class="status-dot is-unknown"></span>
+        リーダーボード(Wraith/kills/PC): 取得エラー（${escapeHtml(leaderboard.error)}）
+      </div>`;
+    return;
+  }
+
+  const list = Array.isArray(leaderboard) ? leaderboard : leaderboard?.data || leaderboard?.players;
+  if (Array.isArray(list) && list.length) {
+    const top3 = list.slice(0, 3).map((p, i) => {
+      const name = p.name || p.playerName || p.username || '???';
+      const value = p.value ?? p.val ?? p.kills ?? '?';
+      return `${i + 1}. ${escapeHtml(String(name))} (${escapeHtml(String(value))})`;
+    }).join(' / ');
+    el.innerHTML = `<div class="status-chip">Wraith kills TOP3 (PC): ${top3}</div>`;
+  } else {
+    el.innerHTML = `
+      <div class="status-chip">
+        リーダーボード: データ形式未確認（<code>${escapeHtml(JSON.stringify(leaderboard).slice(0, 100))}...</code>）
+      </div>`;
   }
 }
 
@@ -34,7 +70,7 @@ function renderGeneratedAt(iso) {
   el.textContent = `LAST SYNC ${d.toLocaleString('ja-JP', { hour12: false })}`;
 }
 
-function renderStatusStrip(serverStatus, mapRotation) {
+function renderStatusStrip(serverStatus, mapRotation, predator) {
   const strip = document.getElementById('status-strip');
   strip.innerHTML = '';
 
@@ -73,6 +109,23 @@ function renderStatusStrip(serverStatus, mapRotation) {
   } else if (mapRotation?.battle_royale?.current?.map) {
     strip.innerHTML += `
       <div class="status-chip">現在のマップ (BR): ${escapeHtml(mapRotation.battle_royale.current.map)}</div>`;
+  }
+
+  // Predator/Masters threshold — response shape is an unverified guess
+  // (RP.PC.val), so render defensively rather than assume it's right.
+  if (predator?.error) {
+    strip.innerHTML += `
+      <div class="status-chip">
+        <span class="status-dot is-unknown"></span>
+        プレデター基準: 取得エラー（${escapeHtml(predator.error)}）
+      </div>`;
+  } else if (predator) {
+    const pcRp = predator?.RP?.PC?.val ?? predator?.RP?.PC;
+    if (pcRp != null) {
+      strip.innerHTML += `<div class="status-chip">PC プレデター基準: ${escapeHtml(String(pcRp))} RP</div>`;
+    } else {
+      strip.innerHTML += `<div class="status-chip">プレデター基準: データ形式未確認（<code>${escapeHtml(JSON.stringify(predator).slice(0, 80))}...</code>）</div>`;
+    }
   }
 }
 
