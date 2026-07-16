@@ -24,14 +24,16 @@ const REDDIT_APEXLEGENDS_RSS = 'https://www.reddit.com/r/apexlegends/.rss';
 const REDDIT_COMPETITIVEAPEX_RSS = 'https://www.reddit.com/r/CompetitiveApex/.rss';
 
 // Reddit asks for a descriptive User-Agent (platform:app-id:version (by /u/username)).
-// A generic UA gets rate-limited/blocked much more often. Replace the placeholder
-// with your own reddit username if you have one — it isn't required to work, but
-// it's the format Reddit's own docs recommend and makes 429s less likely.
-const REDDIT_USER_AGENT = process.env.REDDIT_USER_AGENT || 'web:apex-watch-dashboard:v1.1 (by /u/apex_watch_dev)';
+// The username part is meant to identify a real account, so the default here
+// doesn't invent one — it's still descriptive enough to avoid the generic-UA
+// penalty, but if you have a Reddit account, set REDDIT_USER_AGENT in Vercel
+// env vars to something like "web:apex-watch-dashboard:v1.2 (by /u/yourname)"
+// for the best treatment from Reddit's side.
+const REDDIT_USER_AGENT = process.env.REDDIT_USER_AGENT || 'web:apex-watch-dashboard:v1.2 (personal non-commercial project)';
 
 const APEX_STATUS_API_KEY = process.env.APEX_STATUS_API_KEY || '';
-const APEX_STATUS_SERVERS_URL = `https://api.mozambiquehe.re/servers?auth=${APEX_STATUS_API_KEY}`;
-const APEX_STATUS_MAPROTATION_URL = `https://api.mozambiquehe.re/maprotation?auth=${APEX_STATUS_API_KEY}&version=2`;
+const APEX_STATUS_SERVERS_URL = 'https://api.mozambiquehe.re/servers';
+const APEX_STATUS_MAPROTATION_URL = 'https://api.mozambiquehe.re/maprotation?version=2';
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
 let cache = { data: null, ts: 0 };
@@ -145,7 +147,9 @@ function dedupeByTitleStem(items) {
 async function fetchServerStatus() {
   if (!APEX_STATUS_API_KEY) return null;
   try {
-    const res = await fetchWithTimeout(APEX_STATUS_SERVERS_URL);
+    const res = await fetchWithTimeout(APEX_STATUS_SERVERS_URL, {
+      headers: { Authorization: APEX_STATUS_API_KEY }
+    });
     if (!res.ok) throw new Error(`status ${res.status}`);
     const raw = await res.json();
     // Real shape: { Origin_login: { "US-West": { Status, ResponseTime }, "US-East": {...}, ... }, ... }
@@ -165,7 +169,9 @@ async function fetchServerStatus() {
 async function fetchMapRotation() {
   if (!APEX_STATUS_API_KEY) return null;
   try {
-    const res = await fetchWithTimeout(APEX_STATUS_MAPROTATION_URL);
+    const res = await fetchWithTimeout(APEX_STATUS_MAPROTATION_URL, {
+      headers: { Authorization: APEX_STATUS_API_KEY }
+    });
     if (!res.ok) throw new Error(`maprotation ${res.status}`);
     return await res.json(); // { battle_royale: { current: { map, remainingTimer }, next: {...} }, ranked: {...}, ... }
   } catch (e) {
