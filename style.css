@@ -141,8 +141,9 @@ body {
 .feed {
   padding: 20px 28px 60px;
   display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 12px;
-  max-width: 900px;
+  align-items: start;
 }
 
 .feed-loading, .feed-empty {
