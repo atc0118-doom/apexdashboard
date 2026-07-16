@@ -58,7 +58,7 @@ function renderLeaderboard(leaderboard) {
   } else {
     el.innerHTML = `
       <div class="status-chip">
-        リーダーボード: データ形式未確認（<code>${escapeHtml(JSON.stringify(leaderboard).slice(0, 100))}...</code>）
+        リーダーボード: データ形式未確認（<code>${escapeHtml(JSON.stringify(leaderboard).slice(0, 300))}...</code>）
       </div>`;
   }
 }
@@ -124,7 +124,7 @@ function renderStatusStrip(serverStatus, mapRotation, predator) {
     if (pcRp != null) {
       strip.innerHTML += `<div class="status-chip">PC プレデター基準: ${escapeHtml(String(pcRp))} RP</div>`;
     } else {
-      strip.innerHTML += `<div class="status-chip">プレデター基準: データ形式未確認（<code>${escapeHtml(JSON.stringify(predator).slice(0, 80))}...</code>）</div>`;
+      strip.innerHTML += `<div class="status-chip">プレデター基準: データ形式未確認（<code>${escapeHtml(JSON.stringify(predator).slice(0, 300))}...</code>）</div>`;
     }
   }
 }
