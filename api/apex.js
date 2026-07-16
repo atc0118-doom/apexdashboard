@@ -205,11 +205,18 @@ async function buildDashboard() {
 
   // A freshly created ALS API key is rate-limited to 1 request per 2 seconds.
   // Firing these in parallel (Promise.all) reliably triggers a 429 on one of
-  // them, so call them sequentially with a gap instead. This only costs ~2s
-  // once per 10-minute cache refresh, not per page view.
+  // them, so call them sequentially with a gap instead.
   const serverStatus = await fetchServerStatus();
-  await new Promise(r => setTimeout(r, 2200));
-  const mapRotation = await fetchMapRotation();
+  let mapRotation;
+  if (serverStatus?.error?.includes('429')) {
+    // Already rate-limited — firing a second request right now will likely
+    // just 429 again and dig the hole deeper. Skip it and let the next
+    // 10-minute cache cycle retry cleanly instead.
+    mapRotation = { error: 'skipped after server status 429' };
+  } else {
+    await new Promise(r => setTimeout(r, 3000));
+    mapRotation = await fetchMapRotation();
+  }
 
   const categoryCounts = CATEGORY_RULES.reduce((acc, rule) => {
     acc[rule.key] = { label: rule.label, count: 0 };
