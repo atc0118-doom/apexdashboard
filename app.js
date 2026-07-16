@@ -38,7 +38,8 @@ function renderStatusStrip(serverStatus, mapRotation) {
   const strip = document.getElementById('status-strip');
   strip.innerHTML = '';
 
-  if (!serverStatus && !mapRotation) {
+  // Neither key configured at all.
+  if (serverStatus === null && mapRotation === null) {
     strip.innerHTML = `
       <div class="status-chip">
         <span class="status-dot is-unknown"></span>
@@ -47,26 +48,38 @@ function renderStatusStrip(serverStatus, mapRotation) {
     return;
   }
 
-  if (serverStatus && !serverStatus.error) {
-    const isUp = !!serverStatus.Origin_login?.status?.toLowerCase?.().includes('up') ||
-                 !!serverStatus.All?.toLowerCase?.().includes('up');
+  // Key configured but the request itself failed — say so, don't go silent.
+  if (serverStatus?.error) {
     strip.innerHTML += `
       <div class="status-chip">
-        <span class="status-dot ${isUp ? '' : 'is-down'}"></span>
-        サーバー状況: ${isUp ? '稼働中' : '要確認'}
+        <span class="status-dot is-unknown"></span>
+        サーバー状況: 取得エラー（${escapeHtml(serverStatus.error)}）
+      </div>`;
+  } else if (serverStatus?.regions?.length) {
+    const downRegions = serverStatus.regions.filter(r => !/up/i.test(r.status));
+    strip.innerHTML += `
+      <div class="status-chip">
+        <span class="status-dot ${serverStatus.allUp ? '' : 'is-down'}"></span>
+        サーバー状況: ${serverStatus.allUp ? '全リージョン稼働中' : `${downRegions.length}リージョンで異常`}
       </div>`;
   }
 
-  if (mapRotation && !mapRotation.error) {
-    const current = mapRotation.battle_royale?.current?.map || '--';
+  if (mapRotation?.error) {
     strip.innerHTML += `
-      <div class="status-chip">現在のマップ (BR): ${escapeHtml(current)}</div>`;
+      <div class="status-chip">
+        <span class="status-dot is-unknown"></span>
+        マップ情報: 取得エラー
+      </div>`;
+  } else if (mapRotation?.battle_royale?.current?.map) {
+    strip.innerHTML += `
+      <div class="status-chip">現在のマップ (BR): ${escapeHtml(mapRotation.battle_royale.current.map)}</div>`;
   }
 }
 
 function renderCategoryNav(categoryCounts) {
   const nav = document.getElementById('category-nav');
   nav.querySelectorAll('.ring-tab:not([data-category="all"])').forEach(el => el.remove());
+  nav.querySelector('[data-category="all"]').textContent = 'ALL';
 
   if (!categoryCounts) return;
 
@@ -75,12 +88,18 @@ function renderCategoryNav(categoryCounts) {
     btn.className = 'ring-tab';
     btn.dataset.category = key;
     btn.textContent = `${label} (${count})`;
-    btn.addEventListener('click', () => setActiveCategory(key));
     nav.appendChild(btn);
   });
-
-  nav.querySelector('[data-category="all"]').addEventListener('click', () => setActiveCategory('all'));
 }
+
+// Single delegated listener on the nav container instead of attaching a new
+// listener to every tab on every render (the old code re-added a listener to
+// the "ALL" button each refresh, so clicks fired once per prior refresh too).
+document.getElementById('category-nav').addEventListener('click', (e) => {
+  const btn = e.target.closest('.ring-tab');
+  if (!btn) return;
+  setActiveCategory(btn.dataset.category);
+});
 
 function setActiveCategory(key) {
   state.activeCategory = key;

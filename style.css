@@ -204,6 +204,14 @@ body {
   font-family: var(--mono);
 }
 
+/* ---------- keyboard focus ---------- */
+.hud-refresh:focus-visible,
+.ring-tab:focus-visible,
+.feed-card-title a:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
 @media (max-width: 640px) {
   .hud-bar { flex-wrap: wrap; gap: 12px; padding: 16px; }
   .status-strip, .ring-nav, .feed, .hud-footer { padding-left: 16px; padding-right: 16px; }
