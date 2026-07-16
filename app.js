@@ -20,46 +20,10 @@ async function loadDashboard() {
     state.items = data.items || [];
     renderGeneratedAt(data.generatedAt);
     renderStatusStrip(data.serverStatus, data.mapRotation, data.predator);
-    renderLeaderboard(data.leaderboard);
     renderCategoryNav(data.categoryCounts);
     renderFeed();
   } catch (e) {
     feedEl.innerHTML = `<p class="feed-empty">取得に失敗しました: ${escapeHtml(e.message)}</p>`;
-  }
-}
-
-// Leaderboard response shape is unverified — the API docs only show the
-// query params (legend/key/platform), not what comes back. Render whatever
-// looks like a ranked player array; otherwise show the raw JSON so it's at
-// least visible instead of silently doing nothing.
-function renderLeaderboard(leaderboard) {
-  const el = document.getElementById('leaderboard-strip');
-  el.innerHTML = '';
-
-  if (!leaderboard) return; // no API key configured — say nothing extra, status-strip already covers this
-
-  if (leaderboard.error) {
-    el.innerHTML = `
-      <div class="status-chip">
-        <span class="status-dot is-unknown"></span>
-        リーダーボード(Wraith/kills/PC): 取得エラー（${escapeHtml(leaderboard.error)}）
-      </div>`;
-    return;
-  }
-
-  const list = Array.isArray(leaderboard) ? leaderboard : leaderboard?.data || leaderboard?.players;
-  if (Array.isArray(list) && list.length) {
-    const top3 = list.slice(0, 3).map((p, i) => {
-      const name = p.name || p.playerName || p.username || '???';
-      const value = p.value ?? p.val ?? p.kills ?? '?';
-      return `${i + 1}. ${escapeHtml(String(name))} (${escapeHtml(String(value))})`;
-    }).join(' / ');
-    el.innerHTML = `<div class="status-chip">Wraith kills TOP3 (PC): ${top3}</div>`;
-  } else {
-    el.innerHTML = `
-      <div class="status-chip">
-        リーダーボード: データ形式未確認（<code>${escapeHtml(JSON.stringify(leaderboard).slice(0, 300))}...</code>）
-      </div>`;
   }
 }
 
