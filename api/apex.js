@@ -203,7 +203,13 @@ async function buildDashboard() {
   const CAP = 150;
   items = items.slice(0, CAP);
 
-  const [serverStatus, mapRotation] = await Promise.all([fetchServerStatus(), fetchMapRotation()]);
+  // A freshly created ALS API key is rate-limited to 1 request per 2 seconds.
+  // Firing these in parallel (Promise.all) reliably triggers a 429 on one of
+  // them, so call them sequentially with a gap instead. This only costs ~2s
+  // once per 10-minute cache refresh, not per page view.
+  const serverStatus = await fetchServerStatus();
+  await new Promise(r => setTimeout(r, 2200));
+  const mapRotation = await fetchMapRotation();
 
   const categoryCounts = CATEGORY_RULES.reduce((acc, rule) => {
     acc[rule.key] = { label: rule.label, count: 0 };
