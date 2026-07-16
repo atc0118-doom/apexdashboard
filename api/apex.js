@@ -34,6 +34,11 @@ const REDDIT_USER_AGENT = process.env.REDDIT_USER_AGENT || 'web:apex-watch-dashb
 const APEX_STATUS_API_KEY = process.env.APEX_STATUS_API_KEY || '';
 const APEX_STATUS_SERVERS_URL = 'https://api.apexlegendsstatus.com/servers';
 const APEX_STATUS_MAPROTATION_URL = 'https://api.apexlegendsstatus.com/maprotation?version=2';
+const APEX_STATUS_PREDATOR_URL = 'https://api.apexlegendsstatus.com/predator';
+// legend/key/platform aren't documented as an enum anywhere — these are a
+// best-effort guess (Wraith / kills / PC) to see what the API actually
+// accepts. If this 400s, check the raw error in the report and adjust.
+const APEX_STATUS_LEADERBOARD_URL = 'https://api.apexlegendsstatus.com/leaderboard?legend=Wraith&key=kills&platform=PC';
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
 let cache = { data: null, ts: 0 };
@@ -144,6 +149,35 @@ function dedupeByTitleStem(items) {
   return out;
 }
 
+async function fetchAlsJson(url) {
+  const res = await fetchWithTimeout(url, { headers: { Authorization: APEX_STATUS_API_KEY } });
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(`${res.status}${body ? `: ${body.slice(0, 200)}` : ''}`);
+  }
+  return res.json();
+}
+
+async function fetchPredator() {
+  if (!APEX_STATUS_API_KEY) return null;
+  try {
+    return await fetchAlsJson(APEX_STATUS_PREDATOR_URL);
+    // Unverified shape — expected roughly { RP: { PC: {val, ...}, PS4: {...}, X1: {...}, SWITCH: {...} }, Masters: {...} }
+    // The frontend renders defensively and won't crash if this guess is off.
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
+async function fetchLeaderboard() {
+  if (!APEX_STATUS_API_KEY) return null;
+  try {
+    return await fetchAlsJson(APEX_STATUS_LEADERBOARD_URL);
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
 async function fetchServerStatus() {
   if (!APEX_STATUS_API_KEY) return null;
   try {
@@ -209,19 +243,37 @@ async function buildDashboard() {
   const CAP = 150;
   items = items.slice(0, CAP);
 
-  // A freshly created ALS API key is rate-limited to 1 request per 2 seconds.
-  // Firing these in parallel (Promise.all) reliably triggers a 429 on one of
-  // them, so call them sequentially with a gap instead.
-  const serverStatus = await fetchServerStatus();
-  let mapRotation;
-  if (serverStatus?.error?.includes('429')) {
-    // Already rate-limited — firing a second request right now will likely
-    // just 429 again and dig the hole deeper. Skip it and let the next
-    // 10-minute cache cycle retry cleanly instead.
-    mapRotation = { error: 'skipped after server status 429' };
-  } else {
-    await new Promise(r => setTimeout(r, 3000));
-    mapRotation = await fetchMapRotation();
+  let serverStatus = null, mapRotation = null, predator = null, leaderboard = null;
+
+  if (APEX_STATUS_API_KEY) {
+    // A freshly created ALS API key is rate-limited (1 req/2s by default, more
+    // once Discord-linked). Call everything sequentially with small gaps, and
+    // stop firing further ALS requests this cycle as soon as one comes back
+    // 429 — the next 10-minute cache cycle will retry cleanly instead of
+    // digging the rate-limit hole deeper.
+    let rateLimited = false;
+    serverStatus = await fetchServerStatus();
+    if (serverStatus?.error?.includes('429')) rateLimited = true;
+
+    mapRotation = { error: 'skipped (rate limited)' };
+    if (!rateLimited) {
+      await new Promise(r => setTimeout(r, 700));
+      mapRotation = await fetchMapRotation();
+      if (mapRotation?.error?.includes('429')) rateLimited = true;
+    }
+
+    predator = { error: 'skipped (rate limited)' };
+    if (!rateLimited) {
+      await new Promise(r => setTimeout(r, 700));
+      predator = await fetchPredator();
+      if (predator?.error?.includes('429')) rateLimited = true;
+    }
+
+    leaderboard = { error: 'skipped (rate limited)' };
+    if (!rateLimited) {
+      await new Promise(r => setTimeout(r, 700));
+      leaderboard = await fetchLeaderboard();
+    }
   }
 
   const categoryCounts = CATEGORY_RULES.reduce((acc, rule) => {
@@ -235,6 +287,8 @@ async function buildDashboard() {
     categoryCounts,
     serverStatus,  // null = no API key configured; { error } = key configured but request failed; else real data
     mapRotation,
+    predator,
+    leaderboard,
     report,
     generatedAt: new Date().toISOString()
   };
