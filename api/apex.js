@@ -232,6 +232,14 @@ async function buildDashboard() {
   }
   items = dedupeByTitleStem(items).sort((a, b) => new Date(b.published || 0) - new Date(a.published || 0));
 
+  // Hard recency cutoff — without this, the item-count cap alone lets weeks-old
+  // articles linger during slow news periods (they just never get pushed out).
+  // Items with no parseable date are kept rather than dropped, since we can't
+  // confirm they're stale.
+  const RECENCY_CUTOFF_MS = 7 * 24 * 60 * 60 * 1000;
+  const cutoff = Date.now() - RECENCY_CUTOFF_MS;
+  items = items.filter(item => !item.published || new Date(item.published).getTime() >= cutoff);
+
   // Cap AFTER computing counts from the SAME list we return — otherwise the
   // category counts (computed over everything fetched) don't match what's
   // actually shown (only the top N by recency), which is exactly the
