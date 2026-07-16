@@ -155,7 +155,16 @@ async function fetchAlsJson(url) {
     const body = await res.text().catch(() => '');
     throw new Error(`${res.status}${body ? `: ${body.slice(0, 200)}` : ''}`);
   }
-  return res.json();
+  const json = await res.json();
+  // This API sometimes returns HTTP 200 with an inline {"Error": "..."} body
+  // instead of a real error status code (seen on /leaderboard: "Unauthorized.
+  // You must be..."). Treat that the same as a thrown HTTP error so it
+  // surfaces as a proper error message instead of falling into the
+  // "unrecognized shape" fallback.
+  if (json && typeof json === 'object' && json.Error) {
+    throw new Error(json.Error);
+  }
+  return json;
 }
 
 async function fetchPredator() {
