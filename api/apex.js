@@ -196,6 +196,13 @@ async function buildDashboard() {
   }
   items = dedupeByTitleStem(items).sort((a, b) => new Date(b.published || 0) - new Date(a.published || 0));
 
+  // Cap AFTER computing counts from the SAME list we return — otherwise the
+  // category counts (computed over everything fetched) don't match what's
+  // actually shown (only the top N by recency), which is exactly the
+  // confusing "83 esports items but I don't see them" symptom.
+  const CAP = 150;
+  items = items.slice(0, CAP);
+
   const [serverStatus, mapRotation] = await Promise.all([fetchServerStatus(), fetchMapRotation()]);
 
   const categoryCounts = CATEGORY_RULES.reduce((acc, rule) => {
@@ -205,7 +212,7 @@ async function buildDashboard() {
   for (const item of items) categoryCounts[item.category].count++;
 
   return {
-    items: items.slice(0, 60),
+    items,
     categoryCounts,
     serverStatus,  // null = no API key configured; { error } = key configured but request failed; else real data
     mapRotation,
