@@ -35,10 +35,6 @@ const APEX_STATUS_API_KEY = process.env.APEX_STATUS_API_KEY || '';
 const APEX_STATUS_SERVERS_URL = 'https://api.apexlegendsstatus.com/servers';
 const APEX_STATUS_MAPROTATION_URL = 'https://api.apexlegendsstatus.com/maprotation?version=2';
 const APEX_STATUS_PREDATOR_URL = 'https://api.apexlegendsstatus.com/predator';
-// legend/key/platform aren't documented as an enum anywhere — these are a
-// best-effort guess (Wraith / kills / PC) to see what the API actually
-// accepts. If this 400s, check the raw error in the report and adjust.
-const APEX_STATUS_LEADERBOARD_URL = 'https://api.apexlegendsstatus.com/leaderboard?legend=Wraith&key=kills&platform=PC';
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
 let cache = { data: null, ts: 0 };
@@ -157,7 +153,7 @@ async function fetchAlsJson(url) {
   }
   const json = await res.json();
   // This API sometimes returns HTTP 200 with an inline {"Error": "..."} body
-  // instead of a real error status code (seen on /leaderboard: "Unauthorized.
+  // instead of a real error status code (seen on some endpoints: "Unauthorized.
   // You must be..."). Treat that the same as a thrown HTTP error so it
   // surfaces as a proper error message instead of falling into the
   // "unrecognized shape" fallback.
@@ -173,15 +169,6 @@ async function fetchPredator() {
     return await fetchAlsJson(APEX_STATUS_PREDATOR_URL);
     // Unverified shape — expected roughly { RP: { PC: {val, ...}, PS4: {...}, X1: {...}, SWITCH: {...} }, Masters: {...} }
     // The frontend renders defensively and won't crash if this guess is off.
-  } catch (e) {
-    return { error: e.message };
-  }
-}
-
-async function fetchLeaderboard() {
-  if (!APEX_STATUS_API_KEY) return null;
-  try {
-    return await fetchAlsJson(APEX_STATUS_LEADERBOARD_URL);
   } catch (e) {
     return { error: e.message };
   }
@@ -252,7 +239,7 @@ async function buildDashboard() {
   const CAP = 150;
   items = items.slice(0, CAP);
 
-  let serverStatus = null, mapRotation = null, predator = null, leaderboard = null;
+  let serverStatus = null, mapRotation = null, predator = null;
 
   if (APEX_STATUS_API_KEY) {
     // A freshly created ALS API key is rate-limited (1 req/2s by default, more
@@ -275,13 +262,6 @@ async function buildDashboard() {
     if (!rateLimited) {
       await new Promise(r => setTimeout(r, 700));
       predator = await fetchPredator();
-      if (predator?.error?.includes('429')) rateLimited = true;
-    }
-
-    leaderboard = { error: 'skipped (rate limited)' };
-    if (!rateLimited) {
-      await new Promise(r => setTimeout(r, 700));
-      leaderboard = await fetchLeaderboard();
     }
   }
 
@@ -297,7 +277,6 @@ async function buildDashboard() {
     serverStatus,  // null = no API key configured; { error } = key configured but request failed; else real data
     mapRotation,
     predator,
-    leaderboard,
     report,
     generatedAt: new Date().toISOString()
   };
