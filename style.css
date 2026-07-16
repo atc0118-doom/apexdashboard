@@ -1,0 +1,210 @@
+:root {
+  --bg: #0b0d0f;
+  --panel: #14171a;
+  --panel-raised: #1b1f23;
+  --line: #23282d;
+  --text: #e8e6e1;
+  --muted: #7a8288;
+  --amber: #ff9f1c;
+  --amber-dim: #6b4a15;
+  --red: #e6533f;
+  --green: #4fd1a5;
+  --mono: 'IBM Plex Mono', monospace;
+  --display: 'Oswald', sans-serif;
+  --body: 'Inter', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  background-image:
+    linear-gradient(180deg, rgba(255,159,28,0.04) 0%, transparent 220px);
+  color: var(--text);
+  font-family: var(--body);
+  min-height: 100vh;
+}
+
+/* ---------- HUD bar ---------- */
+.hud-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.hud-brand { display: flex; align-items: center; gap: 14px; }
+
+.hud-mark {
+  font-size: 22px;
+  color: var(--amber);
+  transform: rotate(90deg);
+  display: inline-block;
+}
+
+.hud-title h1 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.hud-subtitle {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--mono);
+  letter-spacing: 0.5px;
+}
+
+.hud-meta { display: flex; align-items: center; gap: 16px; }
+
+.hud-clock {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.hud-refresh {
+  background: transparent;
+  border: 1px solid var(--amber-dim);
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  cursor: pointer;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  transition: background 0.15s, color 0.15s;
+}
+.hud-refresh:hover { background: var(--amber); color: #0b0d0f; }
+
+/* ---------- status strip ---------- */
+.status-strip {
+  display: flex;
+  gap: 12px;
+  padding: 0 28px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.status-chip {
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 2px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+}
+.status-dot.is-down { background: var(--red); }
+.status-dot.is-unknown { background: var(--muted); }
+
+/* ---------- category ring nav ---------- */
+.ring-nav {
+  display: flex;
+  gap: 8px;
+  padding: 16px 28px 0;
+  flex-wrap: wrap;
+}
+
+.ring-tab {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.ring-tab:hover { color: var(--text); }
+.ring-tab.is-active {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+/* ---------- feed ---------- */
+.feed {
+  padding: 20px 28px 60px;
+  display: grid;
+  gap: 12px;
+  max-width: 900px;
+}
+
+.feed-loading, .feed-empty {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.feed-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--amber-dim);
+  padding: 14px 16px;
+  border-radius: 2px;
+  transition: border-left-color 0.15s, background 0.15s;
+}
+.feed-card:hover { background: var(--panel-raised); }
+.feed-card.cat-patch { border-left-color: var(--amber); }
+.feed-card.cat-esports { border-left-color: #6fb1ff; }
+.feed-card.cat-outage { border-left-color: var(--red); }
+.feed-card.cat-general { border-left-color: var(--line); }
+
+.feed-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.feed-card-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.feed-card-title a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.feed-card-title a:hover { color: var(--amber); }
+
+.feed-card-meta {
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ---------- footer ---------- */
+.hud-footer {
+  border-top: 1px solid var(--line);
+  padding: 18px 28px 32px;
+  color: var(--muted);
+  font-size: 11px;
+  font-family: var(--mono);
+}
+
+@media (max-width: 640px) {
+  .hud-bar { flex-wrap: wrap; gap: 12px; padding: 16px; }
+  .status-strip, .ring-nav, .feed, .hud-footer { padding-left: 16px; padding-right: 16px; }
+}

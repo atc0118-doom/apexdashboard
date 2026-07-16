@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX WATCH — Legends Intel Feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hud-bar">
+  <div class="hud-brand">
+    <span class="hud-mark">▲</span>
+    <div class="hud-title">
+      <h1>APEX WATCH</h1>
+      <p class="hud-subtitle">Legends Intel Feed — Personal Project</p>
+    </div>
+  </div>
+  <div class="hud-meta">
+    <div class="hud-clock" id="generated-at">SYNCING…</div>
+    <button class="hud-refresh" id="refresh-btn" type="button">REFRESH</button>
+  </div>
+</header>
+
+<div class="status-strip" id="status-strip">
+  <!-- server status / map rotation injected here if API key configured -->
+</div>
+
+<nav class="ring-nav" id="category-nav">
+  <button class="ring-tab is-active" data-category="all">ALL</button>
+  <!-- category tabs injected by app.js -->
+</nav>
+
+<main class="feed" id="feed">
+  <p class="feed-loading">読み込み中…</p>
+</main>
+
+<footer class="hud-footer">
+  <p>非公式の個人プロジェクトです。EA / Respawn Entertainment とは無関係。データはGoogle News・Redditの公開RSSより取得。</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
