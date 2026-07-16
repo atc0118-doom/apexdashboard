@@ -20,6 +20,8 @@ const GOOGLE_NEWS_ALGS_URL =
   'https://news.google.com/rss/search?q=ALGS%20%22Apex%20Legends%22%20esports&hl=en-US&gl=US&ceid=US:en';
 const GOOGLE_NEWS_JP_URL =
   'https://news.google.com/rss/search?q=%22エーペックスレジェンズ%22&hl=ja&gl=JP&ceid=JP:ja';
+const GOOGLE_NEWS_TIERLIST_URL =
+  'https://news.google.com/rss/search?q=%22Apex%20Legends%22%20%22tier%20list%22&hl=en-US&gl=US&ceid=US:en';
 const REDDIT_APEXLEGENDS_RSS = 'https://www.reddit.com/r/apexlegends/top/.rss?t=day'; // top-of-day, not raw newest — cuts down on low-signal chatter
 const REDDIT_COMPETITIVEAPEX_RSS = 'https://www.reddit.com/r/CompetitiveApex/.rss';
 
@@ -47,8 +49,8 @@ const CATEGORY_RULES = [
   {
     key: 'patch',
     label: 'パッチ / メタ',
-    keywords: ['patch notes', 'nerf', 'buff', 'balance update', 'hotfix', 'rework'],
-    keywordsJa: ['パッチノート', '弱体化', '強化調整', 'ナーフ', 'バフ', 'アップデート情報', '調整内容']
+    keywords: ['patch notes', 'nerf', 'buff', 'balance update', 'hotfix', 'rework', 'tier list'],
+    keywordsJa: ['パッチノート', '弱体化', '強化調整', 'ナーフ', 'バフ', 'アップデート情報', '調整内容', 'ティア表']
   },
   {
     key: 'esports',
@@ -213,6 +215,7 @@ async function buildDashboard() {
   const collectors = [
     ['Google News', () => fetchRss(GOOGLE_NEWS_APEX_URL, 'Google News')],
     ['Google News (ALGS)', () => fetchRss(GOOGLE_NEWS_ALGS_URL, 'Google News')],
+    ['Google News (Tier List)', () => fetchRss(GOOGLE_NEWS_TIERLIST_URL, 'Google News')],
     ['Google News (JP)', () => fetchRss(GOOGLE_NEWS_JP_URL, 'Google News JP')],
     ['r/apexlegends', () => fetchRss(REDDIT_APEXLEGENDS_RSS, 'r/apexlegends', { 'user-agent': REDDIT_USER_AGENT })],
     ['r/CompetitiveApex', () => fetchRss(REDDIT_COMPETITIVEAPEX_RSS, 'r/CompetitiveApex', { 'user-agent': REDDIT_USER_AGENT })]
